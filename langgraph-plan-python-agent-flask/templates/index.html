@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LangGraph Plan Agent</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div><h1>LangGraph Plan Agent</h1><p>Flask Web Console</p></div>
+      <div class="session-info">
+        <span id="modeBadge" class="badge">正在初始化</span>
+        <button id="newSessionButton" class="button secondary" type="button">新会话</button>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="Plan模式操作">
+      <button id="planButton" class="button" type="button">进入 Plan Mode</button>
+      <button id="approveButton" class="button success" type="button" disabled>批准计划</button>
+      <button id="rejectButton" class="button warning" type="button" disabled>拒绝计划</button>
+      <button id="exitPlanButton" class="button secondary" type="button" disabled>退出 Plan Mode</button>
+    </section>
+
+    <section class="workspace">
+      <div class="chat-panel">
+        <div id="messages" class="messages" aria-live="polite"></div>
+        <form id="messageForm" class="composer">
+          <textarea id="messageInput" rows="3" placeholder="输入消息，Enter发送，Shift+Enter换行" required></textarea>
+          <button id="sendButton" class="button" type="submit">发送</button>
+        </form>
+      </div>
+
+      <aside class="side-panel">
+        <h2>会话状态</h2>
+        <dl>
+          <dt>Session ID</dt><dd id="sessionId">—</dd>
+          <dt>当前任务</dt><dd id="currentTask">—</dd>
+          <dt>计划文件</dt><dd id="planFile">—</dd>
+        </dl>
+        <h2>当前计划</h2>
+        <pre id="planPreview" class="plan-preview">尚未生成计划。</pre>
+      </aside>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

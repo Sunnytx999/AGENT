@@ -1,0 +1,42 @@
+:root { color-scheme: light; font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif; color: #182230; background: #eef2f6; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, textarea { font: inherit; }
+.app-shell { width: min(1180px, calc(100% - 32px)); margin: 24px auto; }
+.topbar, .toolbar, .chat-panel, .side-panel { background: #fff; border: 1px solid #d9e0e7; border-radius: 12px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; }
+h1 { margin: 0; font-size: 22px; }
+.topbar p { margin: 4px 0 0; color: #667085; }
+.session-info, .toolbar { display: flex; align-items: center; gap: 10px; }
+.toolbar { margin: 12px 0; padding: 12px; flex-wrap: wrap; }
+.button { border: 0; border-radius: 8px; padding: 9px 14px; color: #fff; background: #2563eb; cursor: pointer; }
+.button.secondary { background: #596579; }
+.button.success { background: #168454; }
+.button.warning { background: #b25b12; }
+.button:disabled { opacity: .45; cursor: not-allowed; }
+.badge { border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 700; color: #344054; background: #e7edf3; }
+.badge.plan { color: #73430b; background: #fff0c7; }
+.workspace { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 12px; }
+.chat-panel { min-height: 640px; display: flex; flex-direction: column; }
+.messages { flex: 1; height: 520px; overflow-y: auto; padding: 18px; }
+.message { max-width: 86%; margin-bottom: 14px; padding: 12px 14px; border-radius: 10px; background: #f2f5f8; }
+.message.user { margin-left: auto; background: #e6efff; }
+.message.error { background: #ffe8e8; color: #9e1c1c; }
+.message strong { display: block; margin-bottom: 5px; font-size: 12px; }
+.message div { white-space: pre-wrap; line-height: 1.55; }
+.composer { display: flex; gap: 10px; padding: 14px; border-top: 1px solid #d9e0e7; }
+.composer textarea { flex: 1; resize: vertical; border: 1px solid #b9c3cf; border-radius: 8px; padding: 10px; }
+.side-panel { padding: 18px; overflow: hidden; }
+.side-panel h2 { margin: 0 0 12px; font-size: 16px; }
+.side-panel h2:not(:first-child) { margin-top: 24px; }
+dl { margin: 0; }
+dt { color: #667085; font-size: 12px; margin-top: 10px; }
+dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+.plan-preview { min-height: 260px; max-height: 430px; margin: 0; overflow: auto; padding: 12px; border-radius: 8px; background: #f5f7fa; white-space: pre-wrap; font: 13px/1.55 Consolas, monospace; }
+@media (max-width: 800px) {
+  .app-shell { width: min(100% - 18px, 1180px); margin: 9px auto; }
+  .topbar { align-items: flex-start; gap: 14px; }
+  .workspace { grid-template-columns: 1fr; }
+  .chat-panel { min-height: 560px; }
+  .messages { height: 440px; }
+}

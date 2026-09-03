@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.sessions/
+.zig-global-cache/
+.zig-local-cache/
+native/build/
+native/.zig-global-cache/
+native/.zig-local-cache/
