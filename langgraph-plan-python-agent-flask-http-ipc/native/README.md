@@ -16,7 +16,7 @@ the model receives the active working directory in its agent prompt and must
 construct absolute tool arguments from it.
 
 The library exposes a stable C ABI from `include/agent_tools.h`. Only the parent
-process loads it with `ctypes`, through `langchain_agent_cli/direct_native.py`.
+process loads it with `ctypes`, through the root-level `direct_native.py`.
 The Flask child uses `langchain_agent_cli/cpp_bridge.py` as an HTTP/JSON client
 and never loads the DLL. LangChain tool schemas and agent-state checks remain
 in `langchain_agent_cli/tools.py`.

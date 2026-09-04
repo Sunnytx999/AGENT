@@ -15,7 +15,7 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from langchain_agent_cli.direct_native import DirectNativeTools
+from direct_native import DirectNativeTools
 
 
 MAX_REQUEST_BYTES = 64 * 1024 * 1024

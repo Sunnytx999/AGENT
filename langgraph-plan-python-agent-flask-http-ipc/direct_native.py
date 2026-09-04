@@ -13,7 +13,7 @@ class DirectNativeError(RuntimeError):
 
 
 def default_library_path() -> Path:
-    native_dir = Path(__file__).resolve().parent.parent / "native" / "bin"
+    native_dir = Path(__file__).resolve().parent / "native" / "bin"
     if sys.platform == "win32":
         filename = "agent_tools_http_ipc_v2.dll"
     elif sys.platform == "darwin":

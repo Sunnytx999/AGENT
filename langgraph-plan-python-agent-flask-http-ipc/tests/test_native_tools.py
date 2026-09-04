@@ -7,7 +7,7 @@ from pathlib import Path
 from threading import Thread
 
 import langchain_agent_cli.cpp_bridge as http_bridge
-from langchain_agent_cli.direct_native import DirectNativeTools
+from direct_native import DirectNativeTools
 from langchain_agent_cli.tools import (
     edit_file,
     get_local_time,
