@@ -29,7 +29,7 @@ class SessionManager:
         self._sessions: dict[str, AgentSession] = {}
         self._lock = Lock()
 
-    def create(self) -> tuple[str, AgentSession]:
+    def create(self, working_directory: Path | None = None) -> tuple[str, AgentSession]:
         session_id = uuid4().hex
         plan_path = self._session_root / session_id / "plan.md"
         session = AgentSession(
@@ -37,6 +37,7 @@ class SessionManager:
                 verbose=True,
                 session_id=session_id,
                 plan_file_path=plan_path,
+                working_directory=working_directory,
             )
         )
         with self._lock:
@@ -72,7 +73,10 @@ def create_app(
 
     @app.get("/")
     def index():
-        return render_template("index.html")
+        return render_template(
+            "index.html",
+            default_working_directory=str(Path.cwd().resolve()),
+        )
 
     @app.get("/api/health")
     def health():
@@ -80,7 +84,17 @@ def create_app(
 
     @app.post("/api/sessions")
     def create_session():
-        session_id, session = sessions.create()
+        payload = request.get_json(silent=True) or {}
+        raw_directory = str(payload.get("working_directory", "")).strip()
+        working_directory = None
+        if raw_directory:
+            candidate = Path(raw_directory).expanduser()
+            if not candidate.is_absolute():
+                return jsonify({"error": "working_directory must be an absolute path."}), 400
+            working_directory = candidate.resolve()
+            if not working_directory.is_dir():
+                return jsonify({"error": "working_directory does not exist or is not a directory."}), 400
+        session_id, session = sessions.create(working_directory)
         return jsonify(_snapshot(session_id, session.agent)), 201
 
     @app.post("/api/messages")

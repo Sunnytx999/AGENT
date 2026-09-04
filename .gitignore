@@ -22,6 +22,8 @@ venv/
 # Native build intermediates
 **/native/build/
 **/.zig-cache/
+**/.zig-global-cache/
+**/.zig-local-cache/
 *.obj
 *.lib
 *.exp

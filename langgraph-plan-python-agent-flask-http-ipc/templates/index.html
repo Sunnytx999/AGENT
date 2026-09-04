@@ -23,6 +23,12 @@
       <button id="exitPlanButton" class="button secondary" type="button" disabled>退出 Plan Mode</button>
     </section>
 
+    <section class="directory-toolbar" aria-label="Agent working directory">
+      <label for="workingDirectoryInput">Agent 工作目录</label>
+      <input id="workingDirectoryInput" type="text" value="{{ default_working_directory }}" spellcheck="false">
+      <span>修改后点击“新会话”生效</span>
+    </section>
+
     <section class="workspace">
       <div class="chat-panel">
         <div id="messages" class="messages" aria-live="polite"></div>

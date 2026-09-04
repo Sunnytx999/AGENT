@@ -6,15 +6,16 @@ import unittest
 from pathlib import Path
 
 from app import create_app
+from native_host import select_flask_port
 
 
 class StubAgent:
-    def __init__(self, verbose, session_id, plan_file_path):
+    def __init__(self, verbose, session_id, plan_file_path, working_directory=None):
         self.plan_mode = False
         self.current_task = None
         self.pending_plan = None
         self.plan_file_path = Path(plan_file_path)
-        self.working_directory = Path.cwd().resolve()
+        self.working_directory = Path(working_directory or Path.cwd()).resolve()
         self._execution_authorized = False
 
     def respond(self, message):
@@ -68,6 +69,30 @@ class FlaskAppTests(unittest.TestCase):
         self.assertIn(b"LangGraph Plan Agent", response.data)
         self.assertIn(b'id="messageForm"', response.data)
         self.assertIn(b'id="planButton"', response.data)
+        self.assertIn(b'id="workingDirectoryInput"', response.data)
+
+    def test_session_accepts_selected_working_directory(self):
+        selected = Path(self.temp.name).resolve()
+        response = self.client.post(
+            "/api/sessions",
+            json={"working_directory": str(selected)},
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.get_json()["working_directory"], str(selected))
+
+    def test_session_rejects_invalid_working_directory(self):
+        relative = self.client.post(
+            "/api/sessions",
+            json={"working_directory": "relative/path"},
+        )
+        missing = self.client.post(
+            "/api/sessions",
+            json={"working_directory": str(Path(self.temp.name) / "missing")},
+        )
+
+        self.assertEqual(relative.status_code, 400)
+        self.assertEqual(missing.status_code, 400)
 
     def test_health_reports_the_serving_process(self):
         response = self.client.get("/api/health")
@@ -77,6 +102,17 @@ class FlaskAppTests(unittest.TestCase):
             response.get_json(),
             {"ok": True, "process_id": os.getpid()},
         )
+
+    def test_unconfigured_flask_port_is_selected_dynamically(self):
+        previous = os.environ.pop("SIMPLE_AGENT_FLASK_PORT", None)
+        try:
+            port = select_flask_port()
+        finally:
+            if previous is not None:
+                os.environ["SIMPLE_AGENT_FLASK_PORT"] = previous
+
+        self.assertGreater(port, 0)
+        self.assertLessEqual(port, 65535)
 
     def test_unknown_session_and_missing_message(self):
         missing = self.client.post("/api/messages", json={"session_id": "missing"})

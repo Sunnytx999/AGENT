@@ -13,7 +13,7 @@ else()
 endif()
 
 set_target_properties(agent_tools PROPERTIES
-    OUTPUT_NAME "agent_tools_http_ipc"
+    OUTPUT_NAME "agent_tools_http_ipc_v2"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/bin"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"

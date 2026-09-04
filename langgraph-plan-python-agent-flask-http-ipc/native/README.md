@@ -30,7 +30,7 @@ Python, while its allowed write/edit operation is performed by this DLL.
 
 ## Build on Windows
 
-The project includes a prebuilt 64-bit `bin/agent_tools_http_ipc.dll`. To rebuild it,
+The project includes a prebuilt 64-bit `bin/agent_tools_http_ipc_v2.dll`. To rebuild it,
 install either CMake plus Visual Studio Build Tools, or Zig:
 
 ```powershell
@@ -38,5 +38,5 @@ python -m pip install ziglang
 powershell -ExecutionPolicy Bypass -File native\build.ps1
 ```
 
-By default the parent bridge loads `native/bin/agent_tools_http_ipc.dll`. Set
+By default the parent bridge loads `native/bin/agent_tools_http_ipc_v2.dll`. Set
 `SIMPLE_AGENT_TOOLS_LIBRARY` to load a library from another location.

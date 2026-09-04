@@ -4,6 +4,7 @@ const elements = {
   input: document.querySelector("#messageInput"),
   send: document.querySelector("#sendButton"),
   newSession: document.querySelector("#newSessionButton"),
+  workingDirectory: document.querySelector("#workingDirectoryInput"),
   plan: document.querySelector("#planButton"),
   approve: document.querySelector("#approveButton"),
   reject: document.querySelector("#rejectButton"),
@@ -67,9 +68,14 @@ async function requestJson(path, options = {}) {
 async function createSession() {
   setBusy(true);
   try {
-    const state = await requestJson("/api/sessions", { method: "POST" });
+    const workingDirectory = elements.workingDirectory.value.trim();
+    const state = await requestJson("/api/sessions", {
+      method: "POST",
+      body: JSON.stringify({ working_directory: workingDirectory }),
+    });
     sessionId = state.session_id;
     latestState = state;
+    elements.workingDirectory.value = state.working_directory;
     elements.messages.replaceChildren();
     appendMessage("assistant", "会话已创建。你可以直接聊天，或先进入 Plan Mode。");
     updateControls(state);

@@ -81,20 +81,22 @@ When RUNTIME MODE is PLAN, the user does not want implementation yet.
 ## PLAN Mode Phase 2: Design
 
 1. Form an implementation approach from the original request and verified evidence.
-2. By default, try to call at least one `plan_codebase` subagent for most non-trivial
-   implementation tasks. Use it even when an initial approach appears clear when an
-   independent pass could validate assumptions, expose edge cases, or improve the
-   sequence of work.
-3. Plan is especially valuable for multi-file, ambiguous, architectural, or risky
-   tasks and for changes with meaningful design tradeoffs.
+2. You MUST call `plan_codebase` at least once before writing plan.md for every
+   non-trivial implementation task. Creating a game, application, feature, service,
+   library, integration, or multi-file project is always non-trivial for this rule,
+   even when the domain is familiar and an initial approach seems obvious.
+3. Do not replace the required Plan call with your own internal planning. Use Plan's
+   independent pass to validate assumptions, expose edge cases, and improve the work
+   sequence. Explore remains optional when sufficient evidence is already available.
 4. When calling Plan, pass the current original implementation request in `task`.
    Do not use a greeting, planning instruction, exploration summary, or revision
    request as the original task.
 5. Give Plan the important exploration findings, relevant paths, requirements,
    constraints, and the specific design question in `request`.
-6. Skip Plan only when the request needs no implementation plan or is truly trivial,
-   such as a typo fix, an obvious one-line change, or a simple rename. Its output is
-   always a candidate plan; you still own the final review and plan file.
+6. Skip Plan only for greetings, conceptual answers requiring no project change, or
+   a truly trivial edit such as a typo, an obvious one-line change, or a simple
+   rename. If the task warrants writing a multi-step plan.md, it warrants calling
+   Plan first. Its output is a candidate plan; you still own final review and saving.
 
 ## PLAN Mode Phase 3: Main-Agent Review
 
@@ -147,8 +149,14 @@ When the runtime includes an existing plan and the user asks for changes:
 
 ## PLAN_APPROVED Mode: Mandatory Execution
 
-When RUNTIME MODE is PLAN_APPROVED, the user has explicitly approved the displayed
-plan. Read the complete approved plan and semantically derive a concise, complete,
+The RUNTIME MODE in the latest user message is authoritative and replaces every
+earlier mode marker in conversation history. When it is PLAN_APPROVED, the program
+has already left PLAN Mode and the user has explicitly approved the displayed plan.
+Never claim that the runtime is still PLAN merely because earlier messages contain
+that marker. Approval is equally valid whether the saved plan was proposed by the
+Plan subagent or composed directly by the main agent.
+
+Read the complete approved plan and semantically derive a concise, complete,
 ordered list containing only executable tasks. Requirements, context, constraints,
 file inventories, and acceptance criteria are supporting information, not separate
 tasks. You MUST call `execute_plan` with that list in its `steps` argument. Do not
@@ -187,6 +195,7 @@ class LangChainAgent:
                 f"{self.working_directory}"
             )
         self.thread_id = f"{session_id}:main"
+        self.approval_thread_id = f"{session_id}:approval"
         self.explore_thread_id = f"{session_id}:explore"
         self.plan_thread_id = f"{session_id}:plan"
         self.execution_thread_id = f"{session_id}:execution"
@@ -565,7 +574,8 @@ class LangChainAgent:
         self._log("[approve] plan approved; main agent must call Execute.")
 
         result = self._invoke_main(
-            self._approved_mode_prompt()
+            self._approved_mode_prompt(),
+            thread_id=self.approval_thread_id,
         )
         if not self._execution_called:
             self._log("[approve] warning: main agent did not call execute_plan.")
@@ -576,6 +586,11 @@ class LangChainAgent:
         return (
             "RUNTIME MODE: PLAN_APPROVED\n"
             f"Main working directory: {self.working_directory}\n"
+            "THIS LATEST RUNTIME MODE IS AUTHORITATIVE AND REPLACES ALL EARLIER "
+            "PLAN MODE MARKERS. The program has already switched out of PLAN Mode. "
+            "Do not claim that approval is still required and do not ask the user "
+            "to approve again. The saved plan is valid whether it was produced with "
+            "the Plan subagent or directly reviewed and written by the main agent.\n\n"
             "The user explicitly approved the current plan. You MUST now call "
             "execute_plan with a complete ordered steps list derived semantically "
             "from the approved plan. Do not implement it directly. After that tool "
@@ -606,12 +621,12 @@ class LangChainAgent:
         self._log("[plan] plan mode exited.")
         return "Plan mode exited."
 
-    def _invoke_main(self, prompt: str) -> str:
+    def _invoke_main(self, prompt: str, thread_id: str | None = None) -> str:
         self._ensure_main_graph()
         self._log("[main] running main agent...")
         result = self._invoke_agent(
             self.main_graph,
-            self.thread_id,
+            thread_id or self.thread_id,
             prompt,
             label="main",
         )
@@ -626,10 +641,25 @@ class LangChainAgent:
         )
 
     def respond(self, prompt: str) -> str:
+        command = prompt.strip().casefold()
+        if command == "/approve":
+            return self.approve_plan()
+        if command == "/reject":
+            return self.reject_plan()
+        if command == "/exit-plan":
+            return self.exit_plan_mode()
+        if command == "/plan":
+            if self.plan_mode:
+                return "Plan mode is already enabled. Describe the task to plan."
+            return self.enter_plan_mode()
+
         if not self.plan_mode:
             if self._execution_authorized:
                 self._execution_called = False
-                return self._invoke_main(self._approved_mode_prompt(prompt))
+                return self._invoke_main(
+                    self._approved_mode_prompt(prompt),
+                    thread_id=self.approval_thread_id,
+                )
             if self.pending_plan is not None and not self._execution_authorized:
                 return "A plan is pending. Use /approve or /reject."
             return self.respond_normally(prompt)

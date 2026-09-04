@@ -1,7 +1,7 @@
 :root { color-scheme: light; font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif; color: #182230; background: #eef2f6; }
 * { box-sizing: border-box; }
 body { margin: 0; }
-button, textarea { font: inherit; }
+button, textarea, input { font: inherit; }
 .app-shell { width: min(1180px, calc(100% - 32px)); margin: 24px auto; }
 .topbar, .toolbar, .chat-panel, .side-panel { background: #fff; border: 1px solid #d9e0e7; border-radius: 12px; }
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; }
@@ -9,6 +9,10 @@ h1 { margin: 0; font-size: 22px; }
 .topbar p { margin: 4px 0 0; color: #667085; }
 .session-info, .toolbar { display: flex; align-items: center; gap: 10px; }
 .toolbar { margin: 12px 0; padding: 12px; flex-wrap: wrap; }
+.directory-toolbar { display: flex; align-items: center; gap: 10px; margin: 12px 0; padding: 12px; background: #fff; border: 1px solid #d9e0e7; border-radius: 12px; }
+.directory-toolbar label { color: #344054; font-size: 13px; font-weight: 700; }
+.directory-toolbar input { min-width: 240px; flex: 1; border: 1px solid #b9c3cf; border-radius: 8px; padding: 9px 10px; color: #182230; }
+.directory-toolbar span { color: #667085; font-size: 12px; }
 .button { border: 0; border-radius: 8px; padding: 9px 14px; color: #fff; background: #2563eb; cursor: pointer; }
 .button.secondary { background: #596579; }
 .button.success { background: #168454; }
@@ -37,6 +41,7 @@ dd { margin: 3px 0 0; overflow-wrap: anywhere; }
   .app-shell { width: min(100% - 18px, 1180px); margin: 9px auto; }
   .topbar { align-items: flex-start; gap: 14px; }
   .workspace { grid-template-columns: 1fr; }
+  .directory-toolbar { align-items: stretch; flex-direction: column; }
   .chat-panel { min-height: 560px; }
   .messages { height: 440px; }
 }

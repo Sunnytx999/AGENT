@@ -34,8 +34,9 @@ AGENT_TOOLS_API int agent_edit_file(
     const char* path, const char* old_string, const char* new_string,
     int replace_all, char* output, size_t output_size, size_t* required_size);
 
-// Start the Flask child with the current process environment. All paths must
-// be absolute. The returned JSON contains the new process ID.
+// Start the Flask child with the current process environment. Executable and
+// script must be absolute. An empty working_directory makes the child inherit
+// the parent process directory; otherwise it must be an absolute directory.
 AGENT_TOOLS_API int agent_start_process(
     const char* executable, const char* script, const char* working_directory,
     char* output, size_t output_size, size_t* required_size);

@@ -18,7 +18,7 @@ if (Get-Command cmake -ErrorAction SilentlyContinue) {
     python -m ziglang c++ -std=c++17 -O2 -w -shared `
         "-I$(Join-Path $nativeRoot 'include')" `
         (Join-Path $nativeRoot "src\agent_tools.cpp") `
-        -o (Join-Path $outputDirectory "agent_tools_http_ipc.dll")
+        -o (Join-Path $outputDirectory "agent_tools_http_ipc_v2.dll")
 } else {
     throw "No compiler was found. Install CMake plus Visual Studio Build Tools, or run: python -m pip install ziglang"
 }

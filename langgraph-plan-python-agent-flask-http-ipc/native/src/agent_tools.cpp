@@ -482,15 +482,20 @@ int agent_start_process(const char* executable, const char* script,
 #ifdef _WIN32
         const fs::path executable_path = absolute_input_path(executable);
         const fs::path script_path = absolute_input_path(script);
-        const fs::path working_path = absolute_input_path(working_directory);
+        const bool has_working_directory =
+            working_directory != nullptr && working_directory[0] != '\0';
+        fs::path working_path;
         if (!fs::is_regular_file(executable_path)) {
             return error_json("Python executable does not exist: " + to_utf8(executable_path));
         }
         if (!fs::is_regular_file(script_path)) {
             return error_json("Flask entry point does not exist: " + to_utf8(script_path));
         }
-        if (!fs::is_directory(working_path)) {
-            return error_json("Working directory does not exist: " + to_utf8(working_path));
+        if (has_working_directory) {
+            working_path = absolute_input_path(working_directory);
+            if (!fs::is_directory(working_path)) {
+                return error_json("Working directory does not exist: " + to_utf8(working_path));
+            }
         }
         std::wstring command = L"\"" + executable_path.wstring() + L"\" \"" +
                                script_path.wstring() + L"\"";
@@ -499,7 +504,8 @@ int agent_start_process(const char* executable, const char* script,
         PROCESS_INFORMATION process{};
         const BOOL started = CreateProcessW(
             executable_path.c_str(), command.data(), nullptr, nullptr, TRUE,
-            CREATE_UNICODE_ENVIRONMENT, nullptr, working_path.c_str(), &startup,
+            CREATE_UNICODE_ENVIRONMENT, nullptr,
+            has_working_directory ? working_path.c_str() : nullptr, &startup,
             &process);
         if (!started) {
             return error_json("Unable to start Flask child process (Windows error " +

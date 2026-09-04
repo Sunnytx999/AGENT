@@ -15,11 +15,11 @@ class DirectNativeError(RuntimeError):
 def default_library_path() -> Path:
     native_dir = Path(__file__).resolve().parent.parent / "native" / "bin"
     if sys.platform == "win32":
-        filename = "agent_tools_http_ipc.dll"
+        filename = "agent_tools_http_ipc_v2.dll"
     elif sys.platform == "darwin":
-        filename = "libagent_tools_http_ipc.dylib"
+        filename = "libagent_tools_http_ipc_v2.dylib"
     else:
-        filename = "libagent_tools_http_ipc.so"
+        filename = "libagent_tools_http_ipc_v2.so"
     return native_dir / filename
 
 
@@ -98,5 +98,15 @@ class DirectNativeTools:
     def edit_file(self, path: str, old_string: str, new_string: str, replace_all: bool) -> dict[str, Any]:
         return self._call("agent_edit_file", self._utf8(path), self._utf8(old_string), self._utf8(new_string), int(replace_all))
 
-    def start_process(self, executable: str, script: str, working_directory: str) -> dict[str, Any]:
-        return self._call("agent_start_process", self._utf8(executable), self._utf8(script), self._utf8(working_directory))
+    def start_process(
+        self,
+        executable: str,
+        script: str,
+        working_directory: str | None = None,
+    ) -> dict[str, Any]:
+        return self._call(
+            "agent_start_process",
+            self._utf8(executable),
+            self._utf8(script),
+            self._utf8(working_directory or ""),
+        )

@@ -5,6 +5,7 @@ import hmac
 import json
 import os
 import secrets
+import socket
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -18,6 +19,19 @@ from langchain_agent_cli.direct_native import DirectNativeTools
 
 
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
+
+
+def select_flask_port(host: str = "127.0.0.1") -> int:
+    """Use the configured Flask port or ask Windows for an available one."""
+    configured = os.getenv("SIMPLE_AGENT_FLASK_PORT", "").strip()
+    if configured:
+        port = int(configured)
+        if not 1 <= port <= 65535:
+            raise ValueError("SIMPLE_AGENT_FLASK_PORT must be between 1 and 65535.")
+        return port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.bind((host, 0))
+        return int(probe.getsockname()[1])
 
 
 def _dispatch(tools: DirectNativeTools, method: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -193,27 +207,32 @@ def main() -> int:
     server_thread.start()
     host, port = server.server_address
     endpoint = f"http://{host}:{port}"
+    flask_host = "127.0.0.1"
+    flask_port = select_flask_port(flask_host)
     os.environ["SIMPLE_AGENT_TOOL_URL"] = endpoint
     os.environ["SIMPLE_AGENT_TOOL_TOKEN"] = token
     os.environ["SIMPLE_AGENT_FLASK_CHILD"] = "1"
+    os.environ["SIMPLE_AGENT_FLASK_PORT"] = str(flask_port)
     os.environ["PYTHONUNBUFFERED"] = "1"
     print(f"[native-host] PID {os.getpid()} loaded {tools.path}", flush=True)
     print(f"[native-host] tool API listening on {endpoint}", flush=True)
-    started = tools.start_process(str(Path(sys.executable).resolve()), str((project_root / "app.py").resolve()), str(project_root))
+    started = tools.start_process(
+        str(Path(sys.executable).resolve()),
+        str((project_root / "app.py").resolve()),
+    )
     if started.get("error"):
         server.shutdown()
         server.server_close()
         raise RuntimeError(str(started["error"]))
     child_pid = int(started["process_id"])
     print(f"[native-host] Flask child started with PID {child_pid}", flush=True)
-    flask_port = int(os.getenv("SIMPLE_AGENT_FLASK_PORT", "5000"))
     try:
-        wait_for_flask("127.0.0.1", flask_port, child_pid)
+        wait_for_flask(flask_host, flask_port, child_pid)
         print(
             f"[native-host] Flask child PID {child_pid} is ready",
             flush=True,
         )
-        print(f"[native-host] open http://127.0.0.1:{flask_port}", flush=True)
+        print(f"[native-host] open http://{flask_host}:{flask_port}", flush=True)
         return _wait_for_windows_process(child_pid)
     except (Exception, KeyboardInterrupt):
         _terminate_windows_process(child_pid)

@@ -6,7 +6,7 @@ native tool boundary is now process-isolated.
 
 ```text
 native_host.py (parent Python process)
-├── loads native/bin/agent_tools_http_ipc.dll exactly once
+├── loads native/bin/agent_tools_http_ipc_v2.dll exactly once
 ├── exposes an authenticated 127.0.0.1 HTTP/JSON tool API
 └── calls the DLL's agent_start_process function to create app.py
 
